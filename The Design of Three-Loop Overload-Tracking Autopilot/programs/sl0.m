@@ -1,0 +1,23 @@
+clc;
+clear;
+a1 = 1.5;
+a2 = 250;
+a3 = 280;
+a4 = 1.6;
+a5 = 0.23;
+V = 914.4;
+detamax = 200;
+nyc = 30;
+pmax = V*(a3*a4-a2*a5)*detamax/(nyc*57.3*9.8);
+x0 = rand(4,1);
+% x0 = [0.8034,0.605,0.3993,0.05269];
+[x,y]=fmincon('fun1',x0,[],[],[],[],[0.000001,0.6,0.000001,45],[Inf,0.6,sqrt(pmax),Inf],'fun2');
+
+wn1o = x(1)^2;
+wno = x(3)/x(1);
+taum = 1/wn1o+2*x(2)/wno;
+gamao = x(4);
+disp(['wn1o:',num2str(wn1o)]);
+disp(['wno:',num2str(wno)]);
+disp(['gamao:',num2str(gamao)]);
+disp(['taum:',num2str(taum)]);
