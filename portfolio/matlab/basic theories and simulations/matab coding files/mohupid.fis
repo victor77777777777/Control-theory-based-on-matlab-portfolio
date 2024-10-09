@@ -1,0 +1,46 @@
+#include"key.h"
+#include"lcd.h"
+#include"com.h"
+#include"iic.h"
+#include"display.h"
+#include"interaction.h"
+#include"check.h"
+
+int vol;										     //光感度
+int sec,min,hou;								 //时钟：时、分、秒（全局变量）
+int warnh_Hh=6;									 //常灭时间段结束时间时针（全局变量，默认值为6）
+int warnh_Hm=0;									 //常灭时间段结束时间分针（全局变量，默认值为0）
+int warnh_Lh=18;								 //常灭时间段开始时间时针（全局变量，默认值为18）
+int warnh_Lm=30;								 //常灭时间段开始时间时针（全局变量，默认值为30）
+int ms;									 //切换界面控制变量（外部变量声明）
+
+
+void main()
+{
+ uchar voldata;								    //用来接收AD值的中间变量
+ int0intal();							        //定时计数器中断初始化
+ lcdintal();								    //lcd初始化
+ 	
+ 
+ while(1)									    //主循环
+ { 	void key();
+    fmq=0;									    //避免蜂鸣器因上拉电阻响
+	voldata = iic_readvoldata();				//接收iic总线输出数据
+    vol = 1000-voldata*5/25.5*20;				//将iic总线输出数据转换成百分比形式的数值（精确到0.1%）
+
+    key();										//调用按键函数（控制界面切换、选择及改变控制数值）
+   if(ms==0) dpy_T(sec,min,hou);				//切换界面控制变量=0：界面a
+     else if(ms==1) dpy_TW();					//切换界面控制变量=1：界面b
+	  else if(ms==2) display();					//切换界面控制变量=2：界面c
+	   else if(ms==3) display_yhf();			//切换界面控制变量=3：界面d
+
+   //如果当前时间在常灭时间段内
+   if((hou>=warnh_Hh) && (min>=warnh_Hm) && (hou<=warnh_Lh) && (min<=warnh_Lm)) 
+   check_L();								    //调用路灯最高点亮值检测函数
+   else 										//否则（当前时间在常灭时间段外）
+     { 
+	   LED1=0; 									//路灯常量
+	 } 							
+ }
+}
+ 
